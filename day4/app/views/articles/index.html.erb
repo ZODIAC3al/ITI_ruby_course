@@ -1,0 +1,110 @@
+<header class="app-header">
+  <div class="header-container">
+    <div class="logo">
+      <h1><%= link_to "RubyDev Hub", root_path %></h1>
+    </div>
+    
+    <nav class="main-nav">
+      <% if authenticated? %>
+        <span class="user-greeting">Signed in as <strong><%= Current.user.email_address %></strong></span>
+        <%= link_to "Write Article", new_article_path, class: "btn btn-primary" %>
+        <%= button_to "Sign Out", session_path, method: :delete, class: "btn btn-outline" %>
+      <% else %>
+        <%= link_to "Sign In", new_session_path, class: "btn btn-outline" %>
+        <%= link_to "Register", signup_path, class: "btn btn-primary" %>
+      <% end %>
+    </nav>
+  </div>
+</header>
+
+<main class="container main-content">
+  <% if flash[:notice] %>
+    <div class="flash flash-notice"><%= flash[:notice] %></div>
+  <% end %>
+  <% if flash[:alert] %>
+    <div class="flash flash-alert"><%= flash[:alert] %></div>
+  <% end %>
+
+  <% if authenticated? && @my_articles.any? %>
+    <section class="articles-section my-articles-section">
+      <div class="section-header">
+        <h2>My Articles</h2>
+        <span class="section-subtitle">Articles you wrote (including private and archived)</span>
+      </div>
+      
+      <div class="articles-grid">
+        <% @my_articles.each do |article| %>
+          <div class="article-card card">
+            <% if article.image.attached? %>
+              <div class="card-thumbnail">
+                <%= image_tag article.image, alt: article.title %>
+              </div>
+            <% end %>
+            <div class="card-body">
+              <div class="card-meta">
+                <span class="badge <%= article.public? ? 'badge-success' : 'badge-warning' %>">
+                  <%= article.public? ? 'Public' : 'Private' %>
+                </span>
+                <% if article.archived? %>
+                  <span class="badge badge-danger">Archived</span>
+                <% end %>
+                <% if article.reports_count > 0 %>
+                  <span class="badge badge-neutral">Reports: <%= article.reports_count %></span>
+                <% end %>
+              </div>
+              <h3 class="card-title"><%= link_to article.title, article_path(article) %></h3>
+              <p class="card-excerpt"><%= truncate(article.body, length: 120) %></p>
+              <div class="card-actions">
+                <%= link_to "Read", article_path(article), class: "link-action" %>
+                <%= link_to "Edit", edit_article_path(article), class: "link-action edit" %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+
+  <section class="articles-section public-articles-section">
+    <div class="section-header">
+      <h2>Public Articles</h2>
+      <span class="section-subtitle">Latest public writings from the community</span>
+    </div>
+
+    <% if @articles.any? %>
+      <div class="articles-grid">
+        <% @articles.each do |article| %>
+          <div class="article-card card">
+            <% if article.image.attached? %>
+              <div class="card-thumbnail">
+                <%= image_tag article.image, alt: article.title %>
+              </div>
+            <% end %>
+            <div class="card-body">
+              <div class="card-meta">
+                <span class="card-author">By: <%= article.user.email_address %></span>
+                <% if article.reports_count > 0 %>
+                  <span class="badge badge-neutral">Reports: <%= article.reports_count %></span>
+                <% end %>
+              </div>
+              <h3 class="card-title"><%= link_to article.title, article_path(article) %></h3>
+              <p class="card-excerpt"><%= truncate(article.body, length: 150) %></p>
+              <div class="card-actions">
+                <%= link_to "Read More →", article_path(article), class: "link-action" %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="empty-state card">
+        <p>No public articles found. Be the first to share one!</p>
+        <% if authenticated? %>
+          <%= link_to "Write an Article", new_article_path, class: "btn btn-primary" %>
+        <% else %>
+          <%= link_to "Register to Write", signup_path, class: "btn btn-primary" %>
+        <% end %>
+      </div>
+    <% end %>
+  </section>
+</main>

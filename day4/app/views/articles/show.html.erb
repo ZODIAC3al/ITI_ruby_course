@@ -1,0 +1,57 @@
+<div class="container article-show-page">
+  <div class="back-link">
+    <%= link_to "← Back to Articles", articles_path, class: "link-subtle" %>
+  </div>
+
+  <article class="article-detail card">
+    <% if @article.image.attached? %>
+      <div class="article-hero-image">
+        <%= image_tag @article.image, alt: @article.title %>
+      </div>
+    <% end %>
+
+    <div class="card-body">
+      <div class="article-meta">
+        <span class="meta-author">By: <strong><%= @article.user.email_address %></strong></span>
+        <span class="meta-date">Published: <%= @article.created_at.strftime("%B %d, %Y") %></span>
+        
+        <div class="badges">
+          <% if @article.public? %>
+            <span class="badge badge-success">Public</span>
+          <% else %>
+            <span class="badge badge-warning">Private</span>
+          <% end %>
+
+          <% if @article.archived? %>
+            <span class="badge badge-danger">Archived</span>
+          <% end %>
+
+          <% if @article.reports_count > 0 %>
+            <span class="badge badge-neutral">Reports: <%= @article.reports_count %></span>
+          <% end %>
+        </div>
+      </div>
+
+      <h1 class="article-title"><%= @article.title %></h1>
+      
+      <div class="article-body">
+        <%= simple_format @article.body %>
+      </div>
+
+      <div class="article-actions">
+        <% if authenticated? %>
+          <% if Current.user == @article.user %>
+            <%= link_to "Edit Article", edit_article_path(@article), class: "btn btn-edit" %>
+            <%= button_to "Delete Article", article_path(@article), method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-delete" %>
+          <% else %>
+            <%= button_to "Report Article", report_article_path(@article), method: :post, class: "btn btn-report", data: { confirm: "Are you sure you want to report this article?" } %>
+          <% end %>
+        <% else %>
+          <div class="alert-info">
+            <%= link_to "Sign In", new_session_path %> to edit or report this article.
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </article>
+</div>
